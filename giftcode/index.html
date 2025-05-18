@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="https://cdn.ryusei.f5.si/ryusei-icon-circle.webp" type="image/webp">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TakasumiBOT ギフトコード変換</title>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+      background: linear-gradient(to bottom, var(--gray-50), var(--gray-100));
+      min-height: 100vh;
+      color: var(--gray-800);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.875rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--gray-600);
+    }
+
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 2px solid var(--gray-200);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-content {
+      padding: 1.25rem;
+    }
+
+    .card-footer {
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--gray-300);
+      font-family: monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-700);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--gray-100);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+    }
+
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .btn-icon {
+      padding: 0.25rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn + .btn {
+      margin-left: 0.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .code-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .code-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      border-left: 4px solid var(--gray-300);
+      background-color: white;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .code-item:hover {
+      border-left-color: var(--primary);
+    }
+
+    .code-item.used {
+      background-color: var(--gray-100);
+      border-left-color: var(--primary);
+    }
+
+    .code-index {
+      width: 1.5rem;
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .code-content {
+      flex: 1;
+      min-width: 0;
+      font-family: monospace;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .code-item.used .code-content {
+      text-decoration: line-through;
+      color: var(--gray-400);
+    }
+
+    .code-date {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 0.25rem;
+    }
+
+    .code-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .coin-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--primary);
+    }
+
+    .code-item.used .coin-badge {
+      background-color: var(--gray-200);
+      color: var(--gray-500);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-outline {
+      border: 1px solid var(--gray-300);
+      color: var(--gray-700);
+    }
+
+    .badge-secondary {
+      background-color: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .badge-success {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .stats {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 1rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid var(--primary);
+      max-width: 300px;
+      z-index: 1000;
+      animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+    }
+
+    .toast-title {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .toast-message {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .card-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .card-footer .btn + .btn {
+        margin-left: 0;
+        margin-top: 0.5rem;
+      }
+
+      .code-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .code-actions {
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>TakasumiBOT ギフトコード変換</h1>
+      <p>ギフトコードを実行可能な形式に変換します</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <textarea id="input-text" placeholder="ここにギフトコードを入力してください"></textarea>
+      </div>
+      <div class="card-footer">
+        <div>
+          <button id="convert-btn" class="btn btn-primary">変換する</button>
+          <button id="reset-btn" class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            クリア
+          </button>
+        </div>
+        <button id="clear-all-btn" class="btn btn-danger" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+          全削除
+        </button>
+      </div>
+    </div>
+
+    <div id="results-card" class="card" style="display: none;">
+      <div class="card-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.25rem; font-weight: bold;">変換結果</h2>
+          <div class="stats">
+            <span class="badge badge-outline">合計: <span id="total-count">0</span>件</span>
+            <span class="badge badge-secondary">未使用: <span id="unused-count">0</span>件</span>
+            <span class="badge badge-success">使用済: <span id="used-count">0</span>件</span>
+          </div>
+        </div>
+        
+        <div class="tabs">
+          <div class="tab active" data-tab="all">すべて</div>
+          <div class="tab" data-tab="unused">未使用</div>
+          <div class="tab" data-tab="used">使用済み</div>
+        </div>
+        <div class="tab-content active" data-tab="all">
+          <div id="all-codes" class="code-list"></div>
+        </div>
+        <div class="tab-content" data-tab="unused">
+          <div id="unused-codes" class="code-list"></div>
+        </div>
+        <div class="tab-content" data-tab="used">
+          <div id="used-codes" class="code-list"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button id="copy-all-btn" class="btn btn-outline" style="margin-left: auto;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          表示中のコードを一括コピー
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const COIN_TYPES = [100, 300, 500, 800, 1000, 3000, 5000, 8000, 10000, 15000, 20000, 30000, 50000];
+    
+    const inputText = document.getElementById('input-text');
+    const convertBtn = document.getElementById('convert-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const resultsCard = document.getElementById('results-card');
+    const allCodesContainer = document.getElementById('all-codes');
+    const unusedCodesContainer = document.getElementById('unused-codes');
+    const usedCodesContainer = document.getElementById('used-codes');
+    const copyAllBtn = document.getElementById('copy-all-btn');
+    const totalCountEl = document.getElementById('total-count');
+    const unusedCountEl = document.getElementById('unused-count');
+    const usedCountEl = document.getElementById('used-count');
+    
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    let activeTab = 'all';
+    
+    let codeEntries = [];
+    
+    function init() {
+      loadFromLocalStorage();
+      updateUI();
+      
+      convertBtn.addEventListener('click', convertCodes);
+      resetBtn.addEventListener('click', resetInput);
+      clearAllBtn.addEventListener('click', clearAllCodes);
+      copyAllBtn.addEventListener('click', copyAllCodes);
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.dataset.tab;
+          activeTab = tabId;
+          
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          tabContents.forEach(content => {
+            if (content.dataset.tab === tabId) {
+              content.classList.add('active');
+            } else {
+              content.classList.remove('active');
+            }
+          });
+        });
+      });
+    }
+    
+    function loadFromLocalStorage() {
+      const savedEntries = localStorage.getItem('giftCodeEntries');
+      if (savedEntries) {
+        try {
+          codeEntries = JSON.parse(savedEntries);
+        } catch (e) {
+          console.error('保存データの読み込みに失敗しました', e);
+          codeEntries = [];
+        }
+      }
+    }
+    
+    function saveToLocalStorage() {
+      if (codeEntries.length > 0) {
+        localStorage.setItem('giftCodeEntries', JSON.stringify(codeEntries));
+      } else {
+        localStorage.removeItem('giftCodeEntries');
+      }
+    }
+    
+    function updateUI() {
+      totalCountEl.textContent = codeEntries.length;
+      unusedCountEl.textContent = codeEntries.filter(e => !e.used).length;
+      usedCountEl.textContent = codeEntries.filter(e => e.used).length;
+      
+      if (codeEntries.length > 0) {
+        resultsCard.style.display = 'block';
+        clearAllBtn.style.display = 'block';
+      } else {
+        resultsCard.style.display = 'none';
+        clearAllBtn.style.display = 'none';
+      }
+      
+      renderCodeList(allCodesContainer, codeEntries);
+      renderCodeList(unusedCodesContainer, codeEntries.filter(e => !e.used));
+      renderCodeList(usedCodesContainer, codeEntries.filter(e => e.used));
+    }
+    
+    function renderCodeList(container, entries) {
+      container.innerHTML = '';
+      
+      entries.forEach((entry, index) => {
+        const codeItem = document.createElement('div');
+        codeItem.className = `code-item ${entry.used ? 'used' : ''}`;
+        
+        const codeContent = document.createElement('div');
+        codeContent.style.flex = '1';
+        
+        const codeText = document.createElement('div');
+        codeText.className = 'code-content';
+        codeText.textContent = `/gift get code:${entry.code}`;
+        
+        const codeDate = document.createElement('div');
+        codeDate.className = 'code-date';
+        codeDate.textContent = formatDate(entry.timestamp);
+        
+        codeContent.appendChild(codeText);
+        codeContent.appendChild(codeDate);
+        
+        const codeActions = document.createElement('div');
+        codeActions.className = 'code-actions';
+        
+        if (entry.coin > 0) {
+          const coinBadge = document.createElement('span');
+          coinBadge.className = 'coin-badge';
+          coinBadge.textContent = `${entry.coin.toLocaleString()}コイン`;
+          codeActions.appendChild(coinBadge);
+        }
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn btn-outline btn-sm btn-icon';
+        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+        copyBtn.addEventListener('click', () => {
+          copyCode(entry.code);
+        });
+        
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = `btn ${entry.used ? 'btn-primary' : 'btn-outline'} btn-sm btn-icon`;
+        toggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        toggleBtn.addEventListener('click', () => {
+          toggleUsed(entry.id);
+        });
+        
+        codeActions.appendChild(copyBtn);
+        codeActions.appendChild(toggleBtn);
+        
+        const codeIndex = document.createElement('span');
+        codeIndex.className = 'code-index';
+        codeIndex.textContent = `${index + 1}.`;
+        
+        codeItem.appendChild(codeIndex);
+        codeItem.appendChild(codeContent);
+        codeItem.appendChild(codeActions);
+        
+        container.appendChild(codeItem);
+      });
+    }
+    
+    function convertCodes() {
+      if (!inputText.value.trim()) {
+        showToast('入力エラー', 'テキストを入力してください');
+        return;
+      }
+      
+      const lines = inputText.value.split(/\n/).filter(line => line.trim());
+      const newEntries = [];
+      
+      for (const line of lines) {
+        const parsedData = parseLine(line);
+        
+        if (parsedData.length > 0) {
+          parsedData.forEach(data => {
+            if (data.code) {
+              newEntries.push({
+                id: Math.random().toString(36).substring(2, 9),
+                coin: data.coin || 0,
+                code: data.code,
+                used: false,
+                timestamp: Date.now()
+              });
+            }
+          });
+        }
+      }
+      
+      if (newEntries.length === 0) {
+        showToast('変換エラー', '有効なギフトコードが見つかりませんでした');
+        return;
+      }
+      
+      newEntries.sort((a, b) => a.coin - b.coin);
+      
+      codeEntries = [...codeEntries, ...newEntries];
+      inputText.value = '';
+      
+      saveToLocalStorage();
+      updateUI();
+      
+      showToast('変換完了', `${newEntries.length}件のコードを変換しました`);
+    }
+    
+    function parseLine(line) {
+      const result = [];
+      
+      const urlMatches = line.match(/https?:\/\/gift\.takasumibot\.com\/([a-zA-Z0-9]+)/g);
+      if (urlMatches) {
+        urlMatches.forEach(url => {
+          const codeMatch = url.match(/https?:\/\/gift\.takasumibot\.com\/([a-zA-Z0-9]+)/);
+          if (codeMatch && codeMatch[1]) {
+            const coinMatch = line.match(/(\d+)コイン\s+.*?https?:\/\/gift\.takasumibot\.com\/[a-zA-Z0-9]+/);
+            const coin = coinMatch ? parseInt(coinMatch[1], 10) : 0;
+            
+            result.push({
+              code: codeMatch[1],
+              coin: findClosestCoinType(coin)
+            });
+          }
+        });
+        return result;
+      }
+      
+      const coinCodeMatches = line.match(/(\d+)コイン\s+([a-zA-Z0-9]+)/g);
+      if (coinCodeMatches) {
+        coinCodeMatches.forEach(match => {
+          const parts = match.match(/(\d+)コイン\s+([a-zA-Z0-9]+)/);
+          if (parts && parts[2]) {
+            result.push({
+              code: parts[2],
+              coin: findClosestCoinType(parseInt(parts[1], 10))
+            });
+          }
+        });
+        return result;
+      }
+      
+      const codeOnlyMatches = line.match(/\b([a-zA-Z0-9]+)\b/g);
+      if (codeOnlyMatches) {
+        codeOnlyMatches.forEach(code => {
+          if (!line.includes(`gift.takasumibot.com/${code}`)) {
+            result.push({
+              code: code,
+              coin: 0
+            });
+          }
+        });
+        return result;
+      }
+      
+      return result;
+    }
+    
+    function findClosestCoinType(coin) {
+      if (!coin) return 0;
+      
+      if (COIN_TYPES.includes(coin)) {
+        return coin;
+      } else {
+        const closest = COIN_TYPES.reduce((prev, curr) => {
+          return (Math.abs(curr - coin) < Math.abs(prev - coin) ? curr : prev);
+        });
+        return closest;
+      }
+    }
+    
+    function resetInput() {
+      inputText.value = '';
+      showToast('入力リセット', '入力フィールドをクリアしました');
+    }
+    
+    function clearAllCodes() {
+      if (confirm('すべてのコードを削除しますか？')) {
+        codeEntries = [];
+        saveToLocalStorage();
+        updateUI();
+        showToast('全データ削除', 'すべてのコードを削除しました');
+      }
+    }
+    
+    function toggleUsed(id) {
+      codeEntries = codeEntries.map(entry => 
+        entry.id === id ? { ...entry, used: !entry.used } : entry
+      );
+      saveToLocalStorage();
+      updateUI();
+    }
+    
+    function copyCode(code) {
+      navigator.clipboard.writeText(`/gift get code:${code}`).then(() => {
+        showToast('コピー完了', 'コマンドをコピーしました');
+      });
+    }
+    
+    function copyAllCodes() {
+      let filteredEntries;
+      
+      if (activeTab === 'all') {
+        filteredEntries = codeEntries;
+      } else if (activeTab === 'used') {
+        filteredEntries = codeEntries.filter(e => e.used);
+      } else {
+        filteredEntries = codeEntries.filter(e => !e.used);
+      }
+      
+      const text = filteredEntries.map(e => `/gift get code:${e.code}`).join('\n');
+      
+      if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('一括コピー完了', `${filteredEntries.length}件のコマンドをコピーしました`);
+        });
+      } else {
+        showToast('コピーエラー', 'コピーするコードがありません');
+      }
+    }
+    
+    function formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+    
+    function showToast(title, message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    init();
+  </script>
+</body>
+</html>
