@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://tools.ryusei-star.com/sitemap.xml
